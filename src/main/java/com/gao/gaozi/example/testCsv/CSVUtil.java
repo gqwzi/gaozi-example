@@ -1,0 +1,104 @@
+package com.gao.gaozi.example.testCsv;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+ 
+/**
+ *
+ * CSV文件导出工具类
+ *
+ * @author qixin
+ * @description
+ * @data 2018/7/10 19:25
+ * Version 1.0
+ */
+public class CSVUtil{
+ 
+    /**
+     * CSV文件生成方法
+     * @param head
+     * @param dataList
+     * @param outPutPath
+     * @param filename
+     * @return
+     */
+    public static File createCSVFile(List<Object> head, List<List<Object>> dataList,
+                                     String outPutPath, String filename) {
+ 
+        File csvFile = null;
+        BufferedWriter csvWtriter = null;
+        try {
+            csvFile = new File(outPutPath + File.separator + filename + ".csv");
+            File parent = csvFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+            csvFile.createNewFile();
+ 
+            // GB2312使正确读取分隔符","
+            csvWtriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                    csvFile), "GB2312"), 1024);
+            // 写入文件头部
+            writeRow(head, csvWtriter);
+ 
+            // 写入文件内容
+            for (List<Object> row : dataList) {
+                writeRow(row, csvWtriter);
+            }
+            csvWtriter.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                csvWtriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return csvFile;
+    }
+ 
+    /**
+     * 写一行数据方法
+     * @param row
+     * @param csvWriter
+     * @throws IOException
+     */
+    private static void writeRow(List<Object> row, BufferedWriter csvWriter) throws IOException {
+        // 写入文件头部
+        for (Object data : row) {
+            StringBuffer sb = new StringBuffer();
+            String rowStr = sb.append("\"").append(data).append("\",").toString();
+            csvWriter.write(rowStr);
+        }
+        csvWriter.newLine();
+    }
+
+    public static void main(String[] args) {
+        List<Object> exportData = new ArrayList<>();
+        exportData.add("第一列");
+        exportData.add("第二列");
+        exportData.add("第三列");
+        List<List<Object>> datalist = new ArrayList<>();
+        List<Object> data=new ArrayList<>();
+        data.add("111");
+        data.add("222");
+        data.add("333");
+        List<Object> data1=new ArrayList<>();
+        data1.add("444");
+        data1.add("555");
+        data1.add("666");
+        datalist.add(data);
+        datalist.add(data1);
+        String path = System.getProperty("user.dir") + "/export/";
+        String fileName = "测试csv文件";
+        File file = CSVUtil.createCSVFile(exportData, datalist, path, fileName);
+        String fileName2 = file.getName();
+        System.out.println("文件名称：" + fileName2);
+    }
+}
